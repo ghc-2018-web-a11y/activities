@@ -442,7 +442,7 @@ class CvoxEmbedDomBuilder {
       </div>
       <div class="singleControl volume">
         <label>Volume:</label>
-        <input id="volume" type="range" min=0 value=0 max=100 tabindex="-1">
+        <input id="volume" type="range" min=0 value=30 max=100 tabindex="-1">
       </div>
       <div class="singleControl">
         <label>
