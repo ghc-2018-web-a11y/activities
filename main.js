@@ -34,18 +34,14 @@ window.onload = () => {
 	document.getElementById("dialogCloseButton").addEventListener("click", (e) => {
 		closeDialogButtonClicked();
 	});
+
+  const tabWidget = new TabWidget();
 }
 
 class TabWidget {
  constructor() {
-  var tablist = document.querySelectorAll('.tablist')[0];
-  var tabs;
-  var panels;
-  var delay = determineDelay();
-  generateArrays();
-
   // For easy reference
-  var keys = {
+  this.keys = {
     end: 35,
     home: 36,
     left: 37,
@@ -55,37 +51,43 @@ class TabWidget {
   };
 
   // Add or substract depending on key pressed
-  var direction = {
+  this.direction = {
     37: -1,
     38: -1,
     39: 1,
     40: 1
   };
 
+  this.tablist = document.querySelectorAll('.tablist')[0];
+  this.tabs;
+  this.panels;
+  this.delay = this.determineDelay();
+  this.generateArrays();
+
   // Bind listeners
-  for (i = 0; i < tabs.length; ++i) {
-    addTabListeners(i);
+  for (let i = 0; i < this.tabs.length; ++i) {
+    this.addTabListeners(i);
   };
  }
   
   generateArrays() {
-    tabs = document.querySelectorAll('.tab');
-    panels = document.querySelectorAll('.tabpanel');
+    this.tabs = document.querySelectorAll('.tab');
+    this.panels = document.querySelectorAll('.tabpanel');
   }
 
   addTabListeners(index) {
-    tabs[index].addEventListener('click', clickEventListener);
-    tabs[index].addEventListener('keydown', keydownEventListener);
-    tabs[index].addEventListener('keyup', keyupEventListener);
+    this.tabs[index].addEventListener('click', (ev) => this.clickEventListener(ev));
+    this.tabs[index].addEventListener('keydown', (ev) => this.keydownEventListener(ev));
+    this.tabs[index].addEventListener('keyup', (ev) =>this.keyupEventListener(ev));
 
     // Build an array with all tabs (<button>s) in it
-    tabs[index].index = index;
+    this.tabs[index].index = index;
   }
 
   // When a tab is clicked, activateTab is fired to activate it
   clickEventListener (event) {
     var tab = event.target;
-    activateTab(tab, false);
+    this.activateTab(tab, false);
   }
 
   // Handle keydown on tabs
@@ -93,22 +95,22 @@ class TabWidget {
     var key = event.keyCode;
 
     switch (key) {
-      case keys.end:
+      case this.keys.end:
         event.preventDefault();
         // Activate last tab
-        activateTab(tabs[tabs.length - 1]);
+        this.activateTab(this.tabs[tabs.length - 1]);
         break;
-      case keys.home:
+      case this.keys.home:
         event.preventDefault();
         // Activate first tab
-        activateTab(tabs[0]);
+        this.activateTab(this.tabs[0]);
         break;
 
       // Up and down are in keydown
       // because we need to prevent page scroll >:)
-      case keys.up:
-      case keys.down:
-        determineOrientation(event);
+      case this.keys.up:
+      case this.keys.down:
+        this.determineOrientation(event);
         break;
     };
   }
@@ -118,9 +120,9 @@ class TabWidget {
     var key = event.keyCode;
 
     switch (key) {
-      case keys.left:
-      case keys.right:
-        determineOrientation(event);
+      case this.keys.left:
+      case this.keys.right:
+        this.determineOrientation(event);
         break;
     };
   }
@@ -130,7 +132,7 @@ class TabWidget {
   // In all other cases only left and right arrow function.
   determineOrientation(event) {
     var key = event.keyCode;
-    var vertical = tablist.getAttribute('aria-orientation') == 'vertical';
+    var vertical = this.tablist.getAttribute('aria-orientation') == 'vertical';
     var proceed = false;
 
     if (vertical) {
@@ -140,13 +142,13 @@ class TabWidget {
       };
     }
     else {
-      if (key === keys.left || key === keys.right) {
+      if (key === this.keys.left || key === this.keys.right) {
         proceed = true;
       };
     };
 
     if (proceed) {
-      switchTabOnArrowPress(event);
+      this.switchTabOnArrowPress(event);
     };
   };
 
@@ -155,21 +157,22 @@ class TabWidget {
   switchTabOnArrowPress(event) {
     var pressed = event.keyCode;
 
-    for (x = 0; x < tabs.length; x++) {
-      tabs[x].addEventListener('focus', focusEventHandler);
+    for (let x = 0; x < this.tabs.length; x++) {
+      this.currentFocusEventHandler = (ev) => this.focusEventHandler(ev);
+      this.tabs[x].addEventListener('focus', this.currentFocusEventHandler);
     };
 
-    if (direction[pressed]) {
+    if (this.direction[pressed]) {
       var target = event.target;
       if (target.index !== undefined) {
-        if (tabs[target.index + direction[pressed]]) {
-          tabs[target.index + direction[pressed]].focus();
+        if (this.tabs[target.index + this.direction[pressed]]) {
+          this.tabs[target.index + this.direction[pressed]].focus();
         }
-        else if (pressed === keys.left || pressed === keys.up) {
-          focusLastTab();
+        else if (pressed === this.keys.left || pressed === this.keys.up) {
+          this.focusLastTab();
         }
-        else if (pressed === keys.right || pressed == keys.down) {
-          focusFirstTab();
+        else if (pressed === this.keys.right || pressed == this.keys.down) {
+          this.focusFirstTab();
         };
       };
     };
@@ -179,7 +182,7 @@ class TabWidget {
   activateTab(tab, setFocus) {
     setFocus = setFocus || true;
     // Deactivate all other tabs
-    deactivateTabs();
+    this.deactivateTabs();
 
     // Remove tabindex attribute
     tab.removeAttribute('tabindex');
@@ -201,34 +204,36 @@ class TabWidget {
 
   // Deactivate all tabs and tab panels
   deactivateTabs() {
-    for (t = 0; t < tabs.length; t++) {
-      tabs[t].classList.remove("selected");
-      tabs[t].removeEventListener('focus', focusEventHandler);
+    for (let t = 0; t < this.tabs.length; t++) {
+      this.tabs[t].classList.remove("selected");
+      if (this.currentFocusEventHandler) {
+        this.tabs[t].removeEventListener('focus', this.currentFocusEventHandler);
+      }
     };
 
-    for (p = 0; p < panels.length; p++) {
-      panels[p].setAttribute('hidden', 'hidden');
+    for (let p = 0; p < this.panels.length; p++) {
+      this.panels[p].setAttribute('hidden', 'hidden');
     };
   }
 
   // Make a guess
   focusFirstTab () {
-    tabs[0].focus();
+    this.tabs[0].focus();
   }
 
   // Make a guess
   focusLastTab () {
-    tabs[tabs.length - 1].focus();
+    this.tabs[this.tabs.length - 1].focus();
   }
 
   // Determine whether there should be a delay
   // when user navigates with the arrow keys
   determineDelay() {
-    var hasDelay = tablist.hasAttribute('data-delay');
+    var hasDelay = this.tablist.hasAttribute('data-delay');
     var delay = 0;
 
     if (hasDelay) {
-      var delayValue = tablist.getAttribute('data-delay');
+      var delayValue = this.tablist.getAttribute('data-delay');
       if (delayValue) {
         delay = delayValue;
       }
@@ -242,15 +247,15 @@ class TabWidget {
 
   focusEventHandler(event) {
     var target = event.target;
-    setTimeout(checkTabFocus, delay, target);
+    setTimeout((target) => this.checkTabFocus(target), this.delay, target);
   }
 
   // Only activate tab on focus if it still has focus after the delay
   checkTabFocus(target) {
-    focused = document.activeElement;
+    const focused = document.activeElement;
 
     if (target === focused) {
-      activateTab(target, false);
+      this.activateTab(target, false);
     };
   }
 }
