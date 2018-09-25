@@ -240,7 +240,6 @@ class CvoxEmbed {
     $('previous').addEventListener('click', e => this.onPreviousButtonClicked(e));
     $('top').addEventListener('click', e => this.onTopButtonClicked(e));
     $('heading').addEventListener('click', e => this.onHeadingButtonClicked(e));
-    $('click').addEventListener('click', e => this.onClickButtonClicked(e));
     $('scrim').addEventListener('change', e => this.onScrimToggleClicked(e));
   }
 
