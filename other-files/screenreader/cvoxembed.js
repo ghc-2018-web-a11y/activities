@@ -448,7 +448,7 @@ class CvoxEmbedDomBuilder {
         <label>
            Blur the page:
         </label>
-        <input type="checkbox" id="scrim" />
+        <input type="checkbox" id="scrim" tabindex="-1" />
       </div>
     </div>
   </div>
