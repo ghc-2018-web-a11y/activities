@@ -1,5 +1,9 @@
 .buyDialog.isHidden {
-  z-index: -1;
+  display: none;
+}
+
+.button {
+  cursor: default;
 }
 
 /* No need to modify the CSS below. */
