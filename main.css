@@ -173,6 +173,10 @@ h3 {
   flex-shrink: 0;
 }
 
+.buyButton {
+  color: grey;
+}
+
 .pagebody {
   width: 100%;
 }
